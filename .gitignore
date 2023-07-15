@@ -1,6 +1,5 @@
 
-todo-list-app/.terraform
-todo-list-app/.terraform.lock.hcl
-todo-list-app/terraform.tfvars
+*/.terraform/*
+*/.terraform.lock.hcl
 
 
