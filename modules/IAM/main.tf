@@ -29,7 +29,6 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
   # The ARN of the policy you want to apply
   # https://github.com/SummitRoute/aws_managed_policies/blob/master/policies/AmazonEKSClusterPolicy
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-
   # The role the policy should be applied to
   role = aws_iam_role.eks_cluster_role.name
 }

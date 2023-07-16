@@ -36,9 +36,9 @@ resource "aws_internet_gateway" "internet_gateway" {
 data "aws_availability_zones" "available_zones" {}
 
 # create public subnet pub-sub-1-a
-resource "aws_subnet" "pub-sub-1-a" {
+resource "aws_subnet" "pub-sub-1" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.PUB_SUB_1_A_CIDR
+  cidr_block              = var.PUB_SUB_1_CIDR
   availability_zone       = data.aws_availability_zones.available_zones.names[0]
   map_public_ip_on_launch = true
 
@@ -51,9 +51,9 @@ resource "aws_subnet" "pub-sub-1-a" {
 }
 
 # create public subnet pub-sub-2-b
-resource "aws_subnet" "pub-sub-2-b" {
+resource "aws_subnet" "pub-sub-2" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.PUB_SUB_2_B_CIDR
+  cidr_block              = var.PUB_SUB_2_CIDR
   availability_zone       = data.aws_availability_zones.available_zones.names[1]
   map_public_ip_on_launch = true
 
@@ -79,45 +79,44 @@ resource "aws_route_table" "public_route_table" {
 }
 
 # associate public subnet pub-sub-1-a to "public route table"
-resource "aws_route_table_association" "pub-sub-1-a_route_table_association" {
-  subnet_id      = aws_subnet.pub-sub-1-a.id
+resource "aws_route_table_association" "pub-sub-1_route_table_association" {
+  subnet_id      = aws_subnet.pub-sub-1.id
   route_table_id = aws_route_table.public_route_table.id
 }
 
 # associate public subnet az2 to "public route table"
 resource "aws_route_table_association" "pub-sub-2-b_route_table_association" {
-  subnet_id      = aws_subnet.pub-sub-2-b.id
+  subnet_id      = aws_subnet.pub-sub-2.id
   route_table_id = aws_route_table.public_route_table.id
 }
 
 
 
 
-# create private app subnet pri-sub-3-a
-resource "aws_subnet" "pri-sub-3-a" {
+# create private app subnet pri-sub-1
+resource "aws_subnet" "pri-sub-1" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.PRI_SUB_3_A_CIDR
+  cidr_block              = var.PRI_SUB_1_CIDR
   availability_zone       = data.aws_availability_zones.available_zones.names[0]
   map_public_ip_on_launch = false
 
   tags = {
-    Name                              = "pri-sub-3-a"
+    Name                              = "pri-sub-1"
     "kubernetes.io/cluster/${var.PROJECT_NAME}"       = "shared"
     "kubernetes.io/role/internal-elb" = 1
   }
 }
 
-# create private app pri-sub-4-b
-resource "aws_subnet" "pri-sub-4-b" {
+# create private app pri-sub-2
+resource "aws_subnet" "pri-sub-2" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.PRI_SUB_4_B_CIDR
+  cidr_block              = var.PRI_SUB_2_CIDR
   availability_zone       = data.aws_availability_zones.available_zones.names[1]
   map_public_ip_on_launch = false
 
   tags = {
-    Name                              = "pri-sub-4-b"
+    Name                              = "pri-sub-2"
     "kubernetes.io/cluster/${var.PROJECT_NAME}"       = "shared"
     "kubernetes.io/role/internal-elb" = 1
   }
 }
-

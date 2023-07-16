@@ -23,7 +23,7 @@ resource "aws_eip" "EIP-NAT-GW-B" {
 # create nat gateway in public subnet pub-sub-1-a
 resource "aws_nat_gateway" "NAT-GW-A" {
   allocation_id = aws_eip.EIP-NAT-GW-A.id
-  subnet_id     = var.PUB_SUB_1_A_ID
+  subnet_id     = var.PUB_SUB_1_ID
 
   tags = {
     Name = "NAT-GW-A"
@@ -36,7 +36,7 @@ resource "aws_nat_gateway" "NAT-GW-A" {
 # create nat gateway in public subnet pub-sub-2-b
 resource "aws_nat_gateway" "NAT-GW-B" {
   allocation_id = aws_eip.EIP-NAT-GW-B.id
-  subnet_id     = var.PUB_SUB_2_B_ID
+  subnet_id     = var.PUB_SUB_2_ID
 
   tags = {
     Name = "NAT-GW-B"
@@ -62,9 +62,9 @@ resource "aws_route_table" "Pri-RT-A" {
   }
 }
 
-# associate private subnet pri-sub-3-a with private route table Pri-RT-A
-resource "aws_route_table_association" "pri-sub-3-a-with-Pri-RT-A" {
-  subnet_id      = var.PRI_SUB_3_A_ID
+# associate private subnet pri-sub-1 with private route table Pri-RT-A
+resource "aws_route_table_association" "pri-sub-1-with-Pri-RT-A" {
+  subnet_id      = var.PRI_SUB_1_ID
   route_table_id = aws_route_table.Pri-RT-A.id
 }
 
@@ -83,8 +83,8 @@ resource "aws_route_table" "Pri-RT-B" {
   }
 }
 
-# associate private subnet pri-sub-4-b with private route Pri-RT-B
-resource "aws_route_table_association" "pri-sub-5-a-with-Pri-RT-B" {
-  subnet_id      = var.PRI_SUB_4_B_ID
+# associate private subnet pri-sub-2 with private route Pri-RT-B
+resource "aws_route_table_association" "pri-sub-2-with-Pri-RT-B" {
+  subnet_id      = var.PRI_SUB_2_ID
   route_table_id = aws_route_table.Pri-RT-B.id
 }
