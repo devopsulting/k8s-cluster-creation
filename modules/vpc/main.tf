@@ -35,7 +35,7 @@ resource "aws_internet_gateway" "internet_gateway" {
 # use data source to get all avalablility zones in region
 data "aws_availability_zones" "available_zones" {}
 
-# create public subnet pub-sub-1-a
+# create public subnet pub-sub-1
 resource "aws_subnet" "pub-sub-1" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.PUB_SUB_1_CIDR
@@ -43,7 +43,7 @@ resource "aws_subnet" "pub-sub-1" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                        = "pub-sub-1-a"
+    Name                        = "pub-sub-1"
     "kubernetes.io/cluster/${var.PROJECT_NAME}" = "shared"
     "kubernetes.io/role/elb"    = 1
 
@@ -58,7 +58,7 @@ resource "aws_subnet" "pub-sub-2" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                        = "pub-sub-2-b"
+    Name                        = "pub-sub-2"
     "kubernetes.io/cluster/${var.PROJECT_NAME}" = "shared"
     "kubernetes.io/role/elb"    = 1
   }
@@ -78,7 +78,7 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
-# associate public subnet pub-sub-1-a to "public route table"
+# associate public subnet pub-sub-1 to "public route table"
 resource "aws_route_table_association" "pub-sub-1_route_table_association" {
   subnet_id      = aws_subnet.pub-sub-1.id
   route_table_id = aws_route_table.public_route_table.id

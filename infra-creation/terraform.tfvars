@@ -1,5 +1,5 @@
 REGION       = "us-east-1"
-PROJECT_NAME = "k8s-infra-creation"
+PROJECT_NAME = "k8s-voting-app"
 
 VPC_CIDR  = "10.0.0.0/18"
 PUB_SUB_1_CIDR = "10.0.1.0/24"

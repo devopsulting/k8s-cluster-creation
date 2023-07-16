@@ -1,5 +1,5 @@
 
-# allocate elastic ip. this eip will be used for the nat-gateway in the public subnet pub-sub-1-a
+# allocate elastic ip. this eip will be used for the nat-gateway in the public subnet pub-sub-1
 resource "aws_eip" "EIP-NAT-GW-A" {
   vpc = true
 
@@ -10,7 +10,7 @@ resource "aws_eip" "EIP-NAT-GW-A" {
 
 
 
-# allocate elastic ip. this eip will be used for the nat-gateway in the public subnet pub-sub-2-b
+# allocate elastic ip. this eip will be used for the nat-gateway in the public subnet pub-sub-2
 resource "aws_eip" "EIP-NAT-GW-B" {
   vpc = true
 
@@ -20,7 +20,7 @@ resource "aws_eip" "EIP-NAT-GW-B" {
 }
 
 
-# create nat gateway in public subnet pub-sub-1-a
+# create nat gateway in public subnet pub-sub-1
 resource "aws_nat_gateway" "NAT-GW-A" {
   allocation_id = aws_eip.EIP-NAT-GW-A.id
   subnet_id     = var.PUB_SUB_1_ID
@@ -33,7 +33,7 @@ resource "aws_nat_gateway" "NAT-GW-A" {
   depends_on = [var.IGW_ID]
 }
 
-# create nat gateway in public subnet pub-sub-2-b
+# create nat gateway in public subnet pub-sub-2
 resource "aws_nat_gateway" "NAT-GW-B" {
   allocation_id = aws_eip.EIP-NAT-GW-B.id
   subnet_id     = var.PUB_SUB_2_ID

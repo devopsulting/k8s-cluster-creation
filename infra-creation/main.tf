@@ -1,10 +1,10 @@
 
 # creating VPC
 module "VPC" {
-  source           = "../modules/vpc"
-  REGION           = var.REGION
-  PROJECT_NAME     = var.PROJECT_NAME
-  VPC_CIDR         = var.VPC_CIDR
+  source         = "../modules/vpc"
+  REGION         = var.REGION
+  PROJECT_NAME   = var.PROJECT_NAME
+  VPC_CIDR       = var.VPC_CIDR
   PUB_SUB_1_CIDR = var.PUB_SUB_1_CIDR
   PUB_SUB_2_CIDR = var.PUB_SUB_2_CIDR
   PRI_SUB_1_CIDR = var.PRI_SUB_1_CIDR
@@ -16,16 +16,16 @@ module "NAT-GW" {
   source = "../modules/nat-gw"
 
   PUB_SUB_1_ID = module.VPC.PUB_SUB_1_ID
-  IGW_ID         = module.VPC.IGW_ID
+  IGW_ID       = module.VPC.IGW_ID
   PUB_SUB_2_ID = module.VPC.PUB_SUB_2_ID
-  VPC_ID         = module.VPC.VPC_ID
+  VPC_ID       = module.VPC.VPC_ID
   PRI_SUB_1_ID = module.VPC.PRI_SUB_1_ID
   PRI_SUB_2_ID = module.VPC.PRI_SUB_2_ID
 }
 
 
 module "IAM" {
-  source = "../modules/IAM"
+  source       = "../modules/IAM"
   PROJECT_NAME = var.PROJECT_NAME
 }
 
@@ -33,10 +33,10 @@ module "EKS" {
   source               = "../modules/EKS"
   PROJECT_NAME         = var.PROJECT_NAME
   EKS_CLUSTER_ROLE_ARN = module.IAM.EKS_CLUSTER_ROLE_ARN
-  PUB_SUB_1_ID       = module.VPC.PUB_SUB_1_ID
-  PUB_SUB_2_ID       = module.VPC.PUB_SUB_2_ID
-  PRI_SUB_1_ID       = module.VPC.PRI_SUB_1_ID
-  PRI_SUB_2_ID       = module.VPC.PRI_SUB_2_ID
+  PUB_SUB_1_ID         = module.VPC.PUB_SUB_1_ID
+  PUB_SUB_2_ID         = module.VPC.PUB_SUB_2_ID
+  PRI_SUB_1_ID         = module.VPC.PRI_SUB_1_ID
+  PRI_SUB_2_ID         = module.VPC.PRI_SUB_2_ID
 }
 
 
@@ -44,13 +44,13 @@ module "NODE_GROUP" {
   source           = "../modules/Node-group"
   EKS_CLUSTER_NAME = module.EKS.EKS_CLUSTER_NAME
   NODE_GROUP_ARN   = module.IAM.NODE_GROUP_ROLE_ARN
-  PRI_SUB_1_ID   = module.VPC.PRI_SUB_1_ID
-  PRI_SUB_2_ID   = module.VPC.PRI_SUB_2_ID
+  PRI_SUB_1_ID     = module.VPC.PRI_SUB_1_ID
+  PRI_SUB_2_ID     = module.VPC.PRI_SUB_2_ID
 }
 
 # --------Create Route 53 DNS zone--------------------
 resource "aws_route53_zone" "cloudempowered" {
-  name     = "cloudempowered.co"
+  name = "cloudempowered.co"
 }
 
 # Import automatically created Nameserver records to the statefile
@@ -60,6 +60,38 @@ resource "aws_route53_record" "nameservers" {
   ttl             = 3600
   type            = "NS"
   zone_id         = aws_route53_zone.cloudempowered.zone_id
-  records = aws_route53_zone.cloudempowered.name_servers
+  records         = aws_route53_zone.cloudempowered.name_servers
+  depends_on      = [aws_route53_zone.cloudempowered]
 }
+# create a DNS record to validate the certificate request
+resource "aws_route53_record" "validation_route53_record" {
+  count      = length(aws_acm_certificate.acm_certificate.domain_validation_options)
+  name       = element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_name, count.index)
+  type       = element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_type, count.index)
+  zone_id    = aws_route53_zone.cloudempowered.zone_id
+  records    = [element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_value, count.index)]
+  ttl        = "60"
+  depends_on = [aws_acm_certificate.acm_certificate]
+}
+
+# ----------------------------------------------------
+# -------Create SSL certificate for the domain--------
+resource "aws_acm_certificate" "acm_certificate" {
+  domain_name       = "cloudempowered.co"
+  validation_method = "DNS"
+  tags = {
+    Environment = "prod"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Provides a mechanism to wait for an aws_acm_certificate resource to be validated before it can be used in your Terraform configuration.
+
+resource "aws_acm_certificate_validation" "acm_certificate_validation" {
+  certificate_arn         = aws_acm_certificate.acm_certificate.arn
+  validation_record_fqdns = aws_route53_record.validation_route53_record.*.fqdn
+}
+
 # ----------------------------------------------------
