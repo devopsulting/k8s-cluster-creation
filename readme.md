@@ -59,11 +59,11 @@ create one file with the name of `terraform.tfvars` inside `kube_terraform-4thWe
 REGION       = "us-east-1"
 PROJECT_NAME = "Todo-App-EKS"
 
-VPC_CIDR         = "192.168.0.0/16"
-PUB_SUB_1_A_CIDR = "192.168.0.0/18"
-PUB_SUB_2_B_CIDR = "192.168.64.0/18"
-PRI_SUB_3_A_CIDR = "192.168.128.0/18"
-PRI_SUB_4_B_CIDR = "192.168.192.0/18"
+VPC_CIDR         = "10.0.0.0/16"
+PUB_SUB_1_CIDR = "10.0.1.0/24"
+PUB_SUB_2_CIDR = "10.0.2.0/24"
+PRI_SUB_1_CIDR = "10.0.10.0/24"
+PRI_SUB_2_CIDR = "10.0.11.0/24"
 ```
 
 Please take note that the above file is crucial for setting up the infrastructure, so pay close attention to the values you enter for each variable.

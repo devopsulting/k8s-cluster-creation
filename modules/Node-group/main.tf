@@ -15,17 +15,17 @@ resource "aws_eks_node_group" "nodes_general" {
   # These subnets must have the following resource tag: kubernetes.io/cluster/CLUSTER_NAME 
   # (where CLUSTER_NAME is replaced with the name of the EKS Cluster).
   subnet_ids = [
-    var.PRI_SUB_3_A_ID,
-    var.PRI_SUB_4_B_ID
+    var.PRI_SUB_1_ID,
+    var.PRI_SUB_2_ID
   ]
 
   # Configuration block with scaling settings
   scaling_config {
     # Desired number of worker nodes.
-    desired_size = 2
+    desired_size = 3
 
     # Maximum number of worker nodes.
-    max_size = 2
+    max_size = 3
 
     # Minimum number of worker nodes.
     min_size = 2
@@ -40,13 +40,13 @@ resource "aws_eks_node_group" "nodes_general" {
   capacity_type = "ON_DEMAND"
 
   # Disk size in GiB for worker nodes
-  disk_size = 20
+  disk_size = 10
 
   # Force version update if existing pods are unable to be drained due to a pod disruption budget issue.
   force_update_version = false
 
   # List of instance types associated with the EKS Node Group
-  instance_types = ["t3.small"]
+  instance_types = ["t3a.small"]
 
   labels = {
     role = "${var.EKS_CLUSTER_NAME}-Node-group-role",
