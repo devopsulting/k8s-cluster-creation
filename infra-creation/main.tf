@@ -50,13 +50,13 @@ module "NODE_GROUP" {
 
 # --------Create Route 53 DNS zone--------------------
 resource "aws_route53_zone" "cloudempowered" {
-  name = "cloudempowered.co"
+  name = var.HOSTED_ZONE
 }
 
 # Import automatically created Nameserver records to the statefile
 resource "aws_route53_record" "nameservers" {
   allow_overwrite = true
-  name            = "cloudempowered.co"
+  name            = var.HOSTED_ZONE
   ttl             = 3600
   type            = "NS"
   zone_id         = aws_route53_zone.cloudempowered.zone_id
@@ -64,7 +64,7 @@ resource "aws_route53_record" "nameservers" {
   depends_on      = [aws_route53_zone.cloudempowered]
 }
 # create a DNS record to validate the certificate request
-resource "aws_route53_record" "validation_route53_record" {
+/* resource "aws_route53_record" "validation_route53_record" {
   count      = length(aws_acm_certificate.acm_certificate.domain_validation_options)
   name       = element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_name, count.index)
   type       = element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_type, count.index)
@@ -73,11 +73,32 @@ resource "aws_route53_record" "validation_route53_record" {
   ttl        = "60"
   depends_on = [aws_acm_certificate.acm_certificate]
 }
+ */
 
+resource "aws_route53_record" "validation_route53_record" {
+  depends_on = [
+    aws_acm_certificate.acm_certificate
+  ]
+  for_each = {
+    for dvo in aws_acm_certificate.acm_certificate.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = aws_route53_zone.cloudempowered.zone_id
+}
 # ----------------------------------------------------
 # -------Create SSL certificate for the domain--------
 resource "aws_acm_certificate" "acm_certificate" {
-  domain_name       = "cloudempowered.co"
+  domain_name       = var.HOSTED_ZONE
+  subject_alternative_names = ["*.${var.HOSTED_ZONE}"]
   validation_method = "DNS"
   tags = {
     Environment = "prod"
@@ -91,7 +112,7 @@ resource "aws_acm_certificate" "acm_certificate" {
 
 resource "aws_acm_certificate_validation" "acm_certificate_validation" {
   certificate_arn         = aws_acm_certificate.acm_certificate.arn
-  validation_record_fqdns = aws_route53_record.validation_route53_record.*.fqdn
+  validation_record_fqdns = aws_acm_certificate.acm_certificate.domain_validation_options[*].resource_record_name
 }
 
 # ----------------------------------------------------
